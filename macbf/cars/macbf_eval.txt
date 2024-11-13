@@ -1,0 +1,16 @@
+ 1140  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1
+ 1141  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1
+ 1142  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1
+ 1143  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1
+ 1144  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1
+ 1145  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1
+ 1146  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1
+ 1147  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1
+ 1148  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1
+ 1149  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1
+ 1150  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1
+ 1151  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1
+ 1152  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1
+ 1153  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1
+ 1154  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1
+ 1155  python evaluate.py --num_agents 32 --model_path models/model_save --vis 1

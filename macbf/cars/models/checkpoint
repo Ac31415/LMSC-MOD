@@ -1,0 +1,6 @@
+model_checkpoint_path: "model_iter_31000"
+all_model_checkpoint_paths: "model_iter_27000"
+all_model_checkpoint_paths: "model_iter_28000"
+all_model_checkpoint_paths: "model_iter_29000"
+all_model_checkpoint_paths: "model_iter_30000"
+all_model_checkpoint_paths: "model_iter_31000"

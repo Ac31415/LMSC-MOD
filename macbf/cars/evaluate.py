@@ -6,6 +6,17 @@ import time
 import argparse
 import numpy as np
 import tensorflow as tf
+
+# # tf.disable_v2_behavior()
+# # tf.compat.v1.disable_eager_execution()
+
+# import tensorflow.compat.v1 as tf
+
+# Ensure TensorFlow 1.x compatibility
+if tf.__version__.startswith('2'):
+    import tensorflow.compat.v1 as tf
+    tf.disable_v2_behavior()
+
 import matplotlib.pyplot as plt
 
 import core
@@ -20,10 +31,13 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-
+# @tf.function
 def build_evaluation_graph(num_agents):
     s = tf.placeholder(tf.float32, [num_agents, 4])
     g = tf.placeholder(tf.float32, [num_agents, 2])
+    
+    # s = tf.compat.v1.placeholder(tf.float32, [num_agents, 4])
+    # g = tf.compat.v1.placeholder(tf.float32, [num_agents, 2])
     
     x = tf.expand_dims(s, 1) - tf.expand_dims(s, 0)
     h, mask, indices = core.network_cbf(x=x, r=config.DIST_MIN_THRES)
@@ -95,14 +109,25 @@ def main():
     s, g, a, loss_list, acc_list = build_evaluation_graph(args.num_agents)
     
     vars = tf.trainable_variables()
+    
+    # print(vars)
+    
     vars_restore = []
     for v in vars:
+        
+        # print(v.name)
+        
         if 'action' in v.name or 'cbf' in v.name:
             vars_restore.append(v)
+        # vars_restore.append(v)
+        
 
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver(var_list=vars_restore)
+    
+    # saver = tf.compat.v1.train.Saver(var_list=vars_restore)
+    
     saver.restore(sess, args.model_path)
 
     safety_ratios_epoch = []

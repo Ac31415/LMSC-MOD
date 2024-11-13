@@ -3,9 +3,6 @@ import tensorflow as tf
 
 import config
 
-from tensorflow.keras.layers import Conv1D, Dense
-
-
 
 def generate_obstacle_circle(center, radius, num=12):
     theta = np.linspace(0, np.pi*2, num=num, endpoint=False).reshape(-1, 1)
@@ -71,131 +68,85 @@ def generate_data(num_agents, dist_min_thres):
     return states, goals
 
 
-# def network_cbf(x, r, indices=None):
-#     d_norm = tf.sqrt(
-#         tf.reduce_sum(tf.square(x[:, :, :2]) + 1e-4, axis=2))
-#     x = tf.concat([x,
-#         tf.expand_dims(tf.eye(tf.shape(x)[0]), 2),
-#         tf.expand_dims(d_norm - r, 2)], axis=2)
-#     x, indices = remove_distant_agents(x=x, k=config.TOP_K, indices=indices)
-#     dist = tf.sqrt(
-#         tf.reduce_sum(tf.square(x[:, :, :2]) + 1e-4, axis=2, keepdims=True))
-#     mask = tf.cast(tf.less_equal(dist, config.OBS_RADIUS), tf.float32)
-#     x = tf.contrib.layers.conv1d(inputs=x, 
-#                                  num_outputs=64,
-#                                  kernel_size=1, 
-#                                  reuse=tf.AUTO_REUSE,
-#                                  scope='cbf/conv_1', 
-#                                  activation_fn=tf.nn.relu)
-#     x = tf.contrib.layers.conv1d(inputs=x, 
-#                                  num_outputs=128,
-#                                  kernel_size=1, 
-#                                  reuse=tf.AUTO_REUSE,
-#                                  scope='cbf/conv_2', 
-#                                  activation_fn=tf.nn.relu)
-#     x = tf.contrib.layers.conv1d(inputs=x, 
-#                                  num_outputs=64,
-#                                  kernel_size=1, 
-#                                  reuse=tf.AUTO_REUSE,
-#                                  scope='cbf/conv_3', 
-#                                  activation_fn=tf.nn.relu)
-#     x = tf.contrib.layers.conv1d(inputs=x, 
-#                                  num_outputs=1,
-#                                  kernel_size=1, 
-#                                  reuse=tf.AUTO_REUSE,
-#                                  scope='cbf/conv_4', 
-#                                  activation_fn=None)
-#     x = x * mask
-#     return x, mask, indices
-
-
-# def network_action(s, g, obs_radius=1.0, indices=None):
-#     x = tf.expand_dims(s, 1) - tf.expand_dims(s, 0)
-#     x = tf.concat([x,
-#         tf.expand_dims(tf.eye(tf.shape(x)[0]), 2)], axis=2)
-#     x, _ = remove_distant_agents(x=x, k=config.TOP_K, indices=indices)
-#     dist = tf.norm(x[:, :, :2], axis=2, keepdims=True)
-#     mask = tf.cast(tf.less(dist, obs_radius), tf.float32)
-#     x = tf.contrib.layers.conv1d(inputs=x, 
-#                                  num_outputs=64,
-#                                  kernel_size=1, 
-#                                  reuse=tf.AUTO_REUSE,
-#                                  scope='action/conv_1', 
-#                                  activation_fn=tf.nn.relu)
-#     x = tf.contrib.layers.conv1d(inputs=x, 
-#                                  num_outputs=128,
-#                                  kernel_size=1, 
-#                                  reuse=tf.AUTO_REUSE,
-#                                  scope='action/conv_2', 
-#                                  activation_fn=tf.nn.relu)
-#     x = tf.reduce_max(x * mask, axis=1)
-#     x = tf.concat([x, s[:, :2] - g, s[:, 2:]], axis=1)
-#     x = tf.contrib.layers.fully_connected(inputs=x,
-#                                           num_outputs=64,
-#                                           reuse=tf.AUTO_REUSE,
-#                                           scope='action/fc_1',
-#                                           activation_fn=tf.nn.relu)
-#     x = tf.contrib.layers.fully_connected(inputs=x,
-#                                           num_outputs=128,
-#                                           reuse=tf.AUTO_REUSE,
-#                                           scope='action/fc_2',
-#                                           activation_fn=tf.nn.relu)
-#     x = tf.contrib.layers.fully_connected(inputs=x,
-#                                           num_outputs=64,
-#                                           reuse=tf.AUTO_REUSE,
-#                                           scope='action/fc_3',
-#                                           activation_fn=tf.nn.relu)
-#     x = tf.contrib.layers.fully_connected(inputs=x,
-#                                           num_outputs=4,
-#                                           reuse=tf.AUTO_REUSE,
-#                                           scope='action/fc_4',
-#                                           activation_fn=None)
-#     x = 2.0 * tf.nn.sigmoid(x) + 0.2
-#     k_1, k_2, k_3, k_4 = tf.split(x, 4, axis=1)
-#     zeros = tf.zeros_like(k_1)
-#     gain_x = -tf.concat([k_1, zeros, k_2, zeros], axis=1)
-#     gain_y = -tf.concat([zeros, k_3, zeros, k_4], axis=1)
-#     state = tf.concat([s[:, :2] - g, s[:, 2:]], axis=1)
-#     a_x = tf.reduce_sum(state * gain_x, axis=1, keepdims=True)
-#     a_y = tf.reduce_sum(state * gain_y, axis=1, keepdims=True)
-#     a = tf.concat([a_x, a_y], axis=1)
-#     return a
-
-
 def network_cbf(x, r, indices=None):
-    d_norm = tf.sqrt(tf.reduce_sum(tf.square(x[:, :, :2]) + 1e-4, axis=2))
+    d_norm = tf.sqrt(
+        tf.reduce_sum(tf.square(x[:, :, :2]) + 1e-4, axis=2))
     x = tf.concat([x,
-                   tf.expand_dims(tf.eye(tf.shape(x)[0]), 2),
-                   tf.expand_dims(d_norm - r, 2)], axis=2)
+        tf.expand_dims(tf.eye(tf.shape(x)[0]), 2),
+        tf.expand_dims(d_norm - r, 2)], axis=2)
     x, indices = remove_distant_agents(x=x, k=config.TOP_K, indices=indices)
-    dist = tf.sqrt(tf.reduce_sum(tf.square(x[:, :, :2]) + 1e-4, axis=2, keepdims=True))
+    dist = tf.sqrt(
+        tf.reduce_sum(tf.square(x[:, :, :2]) + 1e-4, axis=2, keepdims=True))
     mask = tf.cast(tf.less_equal(dist, config.OBS_RADIUS), tf.float32)
-    
-    x = Conv1D(filters=64, kernel_size=1, activation='relu')(x)
-    x = Conv1D(filters=128, kernel_size=1, activation='relu')(x)
-    x = Conv1D(filters=64, kernel_size=1, activation='relu')(x)
-    x = Conv1D(filters=1, kernel_size=1, activation=None)(x)
-    
+    x = tf.contrib.layers.conv1d(inputs=x, 
+                                 num_outputs=64,
+                                 kernel_size=1, 
+                                 reuse=tf.AUTO_REUSE,
+                                 scope='cbf/conv_1', 
+                                 activation_fn=tf.nn.relu)
+    x = tf.contrib.layers.conv1d(inputs=x, 
+                                 num_outputs=128,
+                                 kernel_size=1, 
+                                 reuse=tf.AUTO_REUSE,
+                                 scope='cbf/conv_2', 
+                                 activation_fn=tf.nn.relu)
+    x = tf.contrib.layers.conv1d(inputs=x, 
+                                 num_outputs=64,
+                                 kernel_size=1, 
+                                 reuse=tf.AUTO_REUSE,
+                                 scope='cbf/conv_3', 
+                                 activation_fn=tf.nn.relu)
+    x = tf.contrib.layers.conv1d(inputs=x, 
+                                 num_outputs=1,
+                                 kernel_size=1, 
+                                 reuse=tf.AUTO_REUSE,
+                                 scope='cbf/conv_4', 
+                                 activation_fn=None)
     x = x * mask
     return x, mask, indices
 
+
 def network_action(s, g, obs_radius=1.0, indices=None):
     x = tf.expand_dims(s, 1) - tf.expand_dims(s, 0)
-    x = tf.concat([x, tf.expand_dims(tf.eye(tf.shape(x)[0]), 2)], axis=2)
+    x = tf.concat([x,
+        tf.expand_dims(tf.eye(tf.shape(x)[0]), 2)], axis=2)
     x, _ = remove_distant_agents(x=x, k=config.TOP_K, indices=indices)
     dist = tf.norm(x[:, :, :2], axis=2, keepdims=True)
     mask = tf.cast(tf.less(dist, obs_radius), tf.float32)
-    
-    x = Conv1D(filters=64, kernel_size=1, activation='relu')(x)
-    x = Conv1D(filters=128, kernel_size=1, activation='relu')(x)
+    x = tf.contrib.layers.conv1d(inputs=x, 
+                                 num_outputs=64,
+                                 kernel_size=1, 
+                                 reuse=tf.AUTO_REUSE,
+                                 scope='action/conv_1', 
+                                 activation_fn=tf.nn.relu)
+    x = tf.contrib.layers.conv1d(inputs=x, 
+                                 num_outputs=128,
+                                 kernel_size=1, 
+                                 reuse=tf.AUTO_REUSE,
+                                 scope='action/conv_2', 
+                                 activation_fn=tf.nn.relu)
     x = tf.reduce_max(x * mask, axis=1)
     x = tf.concat([x, s[:, :2] - g, s[:, 2:]], axis=1)
-    
-    x = Dense(units=64, activation='relu')(x)
-    x = Dense(units=128, activation='relu')(x)
-    x = Dense(units=64, activation='relu')(x)
-    x = Dense(units=4, activation=None)(x)
-    
+    x = tf.contrib.layers.fully_connected(inputs=x,
+                                          num_outputs=64,
+                                          reuse=tf.AUTO_REUSE,
+                                          scope='action/fc_1',
+                                          activation_fn=tf.nn.relu)
+    x = tf.contrib.layers.fully_connected(inputs=x,
+                                          num_outputs=128,
+                                          reuse=tf.AUTO_REUSE,
+                                          scope='action/fc_2',
+                                          activation_fn=tf.nn.relu)
+    x = tf.contrib.layers.fully_connected(inputs=x,
+                                          num_outputs=64,
+                                          reuse=tf.AUTO_REUSE,
+                                          scope='action/fc_3',
+                                          activation_fn=tf.nn.relu)
+    x = tf.contrib.layers.fully_connected(inputs=x,
+                                          num_outputs=4,
+                                          reuse=tf.AUTO_REUSE,
+                                          scope='action/fc_4',
+                                          activation_fn=None)
     x = 2.0 * tf.nn.sigmoid(x) + 0.2
     k_1, k_2, k_3, k_4 = tf.split(x, 4, axis=1)
     zeros = tf.zeros_like(k_1)
@@ -375,13 +326,6 @@ def ttc_dangerous_mask_np(s, r, ttc):
 
 def remove_distant_agents(x, k, indices=None):
     n, _, c = x.get_shape().as_list()
-
-    # print("x shape: ", x.get_shape().as_list())
-    # print("n type: ", type(n))
-    # print("n: ", n)
-    # print("k type: ", type(k))
-    # print("k: ", k)
-
     if n <= k:
         return x, False
     d_norm = tf.sqrt(tf.reduce_sum(tf.square(x[:, :, :2]) + 1e-6, axis=2))
@@ -396,31 +340,3 @@ def remove_distant_agents(x, k, indices=None):
     indices = tf.concat([row_indices, column_indices], axis=1)
     x = tf.reshape(tf.gather_nd(x, indices), [n, k, c])
     return x, indices
-
-
-# def remove_distant_agents(x, k, indices=None):
-#     n = tf.shape(x)[0]  # Get the dynamic shape of the first dimension
-#     _, _, c = x.get_shape().as_list()  # Get the static shape of the last dimension
-
-#     print("n type: ", type(n))
-#     print("n: ", n)
-#     print("k type: ", type(k))
-#     print("k: ", k)
-
-#     if n <= k:
-#         return x, False
-
-#     d_norm = tf.sqrt(tf.reduce_sum(tf.square(x[:, :, :2]) + 1e-6, axis=2))
-
-#     if indices is not None:
-#         x = tf.reshape(tf.gather_nd(x, indices), [n, k, c])
-#         return x, indices
-
-#     _, indices = tf.math.top_k(-d_norm, k=k)
-#     row_indices = tf.expand_dims(tf.range(tf.shape(indices)[0]), 1) * tf.ones_like(indices)
-#     row_indices = tf.reshape(row_indices, [-1, 1])
-#     column_indices = tf.reshape(indices, [-1, 1])
-#     indices = tf.concat([row_indices, column_indices], axis=1)
-#     x = tf.reshape(tf.gather_nd(x, indices), [n, k, c])
-
-#     return x, indices

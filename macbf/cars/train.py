@@ -43,10 +43,15 @@ def build_optimizer(loss):
 
     gradient_vars = [(accumulator / accumulation_counter, var) \
             for (accumulator, (grad, var)) in zip(accumulators, grad_pairs)]
+    
+    # print(gradient_vars)
 
     gradient_vars_h = []
     gradient_vars_a = []
     for accumulate_grad, var in gradient_vars:
+        
+        # print('var name: ', var.name)
+        
         if 'cbf' in var.name:
             gradient_vars_h.append((accumulate_grad, var))
         elif 'action' in var.name:
